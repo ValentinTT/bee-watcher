@@ -1,5 +1,9 @@
 //Library necessary for the rf transmitter
 #include <VirtualWire.h>
+//Library for the DHT 22 sensor
+#include <Adafruit_Sensor.h>
+#include "DHT.h"
+
 //Pin Used for transmission
 const byte transmissionPin = 4;
 //Struct for sending data 
@@ -14,6 +18,10 @@ struct package {
   const byte id = 1; //This change in different SU
 };
 struct package Data;
+
+//DHT creation
+const byte DHTPin = 5;
+DHT dht22(DHTPin, DHT22);
 
 //Analog pins for the ADXL335 
 const byte xPin = 0;
@@ -32,10 +40,14 @@ void setup() {
   vw_set_tx_pin(transmissionPin);
   vw_set_ptt_inverted(true);
   vw_setup(500); //Bits per second
+
+  //Starts the dht sensor
+  dht22.begin();
 }
 
 void loop() {
   readADXL();
+  readTemperatureAndHumidity();
 }
 
 
@@ -48,8 +60,25 @@ void sendData() {
   vw_wait_tx();
 }
 
+/** void readTemperatureAndHumidity() 
+ * This function read the temperature and humidity of the dht22 sensor in about 250ms to 500ms
+ * and then save if on the Data package.
+ */
+void readTemperatureAndHumidity() {
+  float t = dht22.readTemperature();
+  //If there was an error try again
+  if(isnan(t)) t = dht22.readTemperature();
+  float h = dht22.readHumidity();
+  //If there was an error try again
+  if(isnan(h)) h = dht22.readHumidity();
+
+  //If there was no problem save the data
+  if(!isnan(t)) Data.temperature = t;
+  if(!isnan(h)) Data.humidity = h;
+}
+
 /** void readADXL()
- *  This function executes in about 1 second and read 10 times the 
+ *  This function executes in at most 1 second and read 10 times the 
  *  result of the ADXL335 detecting any kind of rotation or movement
  *  it reads 10 times to avoid interference. 
  */
