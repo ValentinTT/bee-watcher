@@ -3,9 +3,6 @@
 //Library for the DHT 22 sensor
 #include <Adafruit_Sensor.h>
 #include "DHT.h"
-
-//Pin Used for transmission
-const byte transmissionPin = 4;
 //Struct for sending data 
 #define hiveSafe 3
 #define hiveDangerFume 1
@@ -13,11 +10,14 @@ const byte transmissionPin = 4;
 struct package {
   float temperature;
   float humidity;
-  float piquera;
+  float hiveEntrance;
   byte safe = hiveSafe; // 3 means ok, 2 means fume, 1 means movement, 0 means both
   const byte id = 1; //This change in different SU
 };
 struct package Data;
+
+//Pin used for transmission
+const byte transmissionPin = 4;
 
 //DHT creation
 const byte DHTPin = 5;
@@ -35,6 +35,12 @@ short xValue;
 short yValue;
 short zValue;
 
+//Digital pins for hc-sr04 used to get the hive entrance status
+const byte trigPin = 6;
+const byte echoPin = 7;
+//Time/soundConstant = distance in centimeters
+const byte soundConstant = 58;
+
 void setup() {
   //Transmitter configuration
   vw_set_tx_pin(transmissionPin);
@@ -43,16 +49,20 @@ void setup() {
 
   //Starts the dht sensor
   dht22.begin();
+
+  //HC-SR04
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
 }
 
 void loop() {
-  readADXL();
-  readTemperatureAndHumidity();
+  hiveEntranceOpening()
+  delay(2000);
 }
 
 
 /* void sendData()
- * This function send the Data package(temp, hum, piq) to the Main Unit after all the
+ * This function send the Data package(temp, hum, hiveEntrance) to the Main Unit after all the
  * messures (including acelerometer and fume sensors) were taken.
  */
 void sendData() {
@@ -88,7 +98,7 @@ void readADXL() {
     xValue = analogRead(xPin);
     yValue = analogRead(yPin);
     zValue = analogRead(zPin);
-    if(abs(xValue - yValue) > XYSensibility) { //Check the sensor's position
+    if(abs(xValue - yValue) > XYSensibility) { //Checks the sensor's position
       if(abs(xValue - zValue) > ZXYSensibility ||
         abs(yValue - zValue) > ZXYSensibility) {
         bentCounter++;
@@ -103,5 +113,17 @@ void readADXL() {
   if(bentCounter > 5) Data.safe -= hiveDangerMovement;
 }
 
-
+/** void hiveEntranceOpening() 
+ * This function uses the HC-SR04 to get the opening at the hive entrance
+ * to calculate it it use a constant soundConstant and the time in which 
+ * the sound travels from the trigger echo to the hive entrance and back 
+ * to the echo pin
+ */
+ void hiveEntranceOpening() {
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  unsigned int timeTravel = pulseIn(echoPin, HIGH);
+  Data.hiveEntrance = timeTravel / soundConstant;
+ }
 
