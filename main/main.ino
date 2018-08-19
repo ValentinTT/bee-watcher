@@ -94,7 +94,7 @@ void loop() {
   goToSleep();
 }
 
-/* void goToSleep()
+/** void goToSleep()
  * This function put the microcontroller on sleep mode to save energy.
  * The only way to wake the arduino up is to fire the interruption (connected to the RTC
  * module) which takes the code to the function wakeUp.
@@ -111,7 +111,7 @@ void loop() {
   RTC.alarm(ALARM_1);
  }
 
-/* void wakeUp()
+/** void wakeUp()
  * This function is the ISR, in charge of disable the sleep mode on the microcontroller.
  * It also changes the time in which the next alarm should be set.
  */
@@ -122,7 +122,7 @@ void wakeUp() {
   detachInterrupt(interruptionNumber);
 }
 
-/* time_t compileTime() By JChristen 
+/** time_t compileTime() By JChristen 
  * This function return a time_t object necesary to set the time in the RTC to the compilation
  * time, using the values saved by C++ in __DATE__ and __TIME__ 
  */
@@ -147,7 +147,7 @@ void wakeUp() {
   return t + FUDGE;        //add fudge factor to allow for compile time
 }
 
-/* void sendData()
+/** void sendData()
  * This function send the Data package(temp, hum, hiveEntrance) to the Main Unit after all the
  * messures (including acelerometer and fume sensors) were taken.
  */
@@ -205,11 +205,11 @@ void readADXL() {
  * the sound travels from the trigger echo to the hive entrance and back 
  * to the echo pin
  */
- void hiveEntranceOpening() {
+void hiveEntranceOpening() {
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
   unsigned int timeTravel = pulseIn(echoPin, HIGH);
   Data.hiveEntrance = timeTravel / soundConstant;
- }
+}
 
