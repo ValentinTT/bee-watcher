@@ -1,7 +1,9 @@
 //Library for the controlling the sleep mode
 #include <avr/sleep.h>
-//Library for ds3231 with interruptions
-#include <DS3232RTC.h> //genera un objeto global RTC
+/* As JChristensen says: "DS3231RTC.h is an Arduino library for the 
+ * Maxim Integrated DS3232 and DS3231", which allows setting interruptions
+ */
+#include <DS3232RTC.h> 
 //Library necessary for the rf transmitter
 #include <VirtualWire.h>
 //Library for the DHT 22 sensor
@@ -12,11 +14,12 @@
 #define hiveSafe 3
 #define hiveDangerFume 1
 #define hiveDangerMovement 2
+#define dataInitialValue -100
 struct package {
-  float temperature;
-  float humidity;
-  float hiveEntrance;
-  byte safe = hiveSafe; // 3 means ok, 2 means fume, 1 means movement, 0 means both
+  float temperature = dataInitialValue;
+  float humidity = dataInitialValue;
+  float hiveEntrance = dataInitialValue;
+  byte safe = hiveSafe; //3 means ok, 2 means fume, 1 means movement, 0 means both
   const byte id = 1; //This change in different SU
 };
 struct package Data;
@@ -49,7 +52,8 @@ const byte soundConstant = 58;
 //Pin to attach interruption, and interruption number bind to that pin
 const byte interruptionPin = 2;
 const byte interruptionNumber = 0;
-byte interruptAtMinute = 5;
+const byte sleepingMinutes = 5;
+byte interruptAtMinute = 0;
 
 void setup() {
   /**The RTC must be the first thing to initialize to try to be as accurate as possible
@@ -68,7 +72,7 @@ void setup() {
 
   // set the RTC time and date to the compile time
   RTC.set(compileTime());
-  // set Alarm 1 to occur at 0 seconds 5 minutes after every hour
+  // set Alarm 1 to occur every each sleepingMinutes minutes
   RTC.setAlarm(ALM1_MATCH_MINUTES, 0, interruptAtMinute, 0, 1);
   // clear the alarm flag
   RTC.alarm(ALARM_1);
@@ -90,8 +94,13 @@ void setup() {
 }
 
 void loop() {
-  delay(100);
   goToSleep();
+  readADXL(); //This and the fumes sensor should be checked every 5 minutes;
+  if(interruptAtMinute == 5) { //This data is taken just once per hour
+    readTemperatureAndHumidity();
+    hiveEntranceOpening();
+  }
+  sendData();
 }
 
 /** void goToSleep()
@@ -103,10 +112,8 @@ void loop() {
   sleep_enable();
   attachInterrupt(interruptionNumber, wakeUp, LOW);
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  time_t t = RTC.get();
   delay(100);
   sleep_cpu();
-  t = RTC.get();
   RTC.setAlarm(ALM1_MATCH_MINUTES, 0, interruptAtMinute, 0, 1);
   RTC.alarm(ALARM_1);
  }
@@ -117,7 +124,7 @@ void loop() {
  */
 void wakeUp() {
   sleep_disable();
-  interruptAtMinute += 5;
+  interruptAtMinute += sleepingMinutes;
   if(interruptAtMinute >= 60) interruptAtMinute -= 60;
   detachInterrupt(interruptionNumber);
 }
@@ -154,6 +161,18 @@ void wakeUp() {
 void sendData() {
   vw_send((uint8_t *)&Data, sizeof(Data));
   vw_wait_tx();
+  resetData();
+}
+
+/** void resetData() 
+ * This function reset the Data package to his initial value. This value is know for the 
+ * Main Unit, so they are not taken into acount
+ */
+void resetData() {
+  Data.temperature = dataInitialValue;
+  Data.humidity = dataInitialValue;
+  Data.hiveEntrance = dataInitialValue;
+  Data.safe = hiveSafe;
 }
 
 /** void readTemperatureAndHumidity() 
