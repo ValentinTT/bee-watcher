@@ -17,6 +17,7 @@ void setup() {
 void loop() {
   goToSleep();
   readADXL(); //This and the fumes sensor should be checked every 5 minutes;
+  if(hasBeenAnHour()) { //This data is taken just once per hour
     readTemperatureAndHumidity();
     hiveEntranceOpening();
   }
