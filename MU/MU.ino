@@ -4,13 +4,14 @@ struct package externalData;
 #include "ADXL335.h"
 #include "innerDHT22.h"
 #include "hiveEntrance.h"
-#include "receiver.h"
+#include "ReceiverNRF24L01.h"
+//#include "receiver.h"
 #include "sleepMode.h"
 #include "datalogger.h"
 
 void setup() {
   setupSleepMode();
-  setupReceiver();
+  seturReceiverNRF24L01();
   setupDatalogger();
   setupInnerDHT22();
   setupHCSR04();  
@@ -24,7 +25,7 @@ void loop() {
     readTemperatureAndHumidity();
     hiveEntranceOpening();
   }
-  readData();
+  receiveData();
   if(externalData.safe != 3) {
     if(externalData.safe = 2); //Send fire alarm
     if(externalData.safe = 1); //Send movement alarm
