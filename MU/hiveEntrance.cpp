@@ -19,5 +19,6 @@ void hiveEntranceOpening() {
   digitalWrite(trigPin, LOW);
   unsigned int timeTravel = pulseIn(echoPin, HIGH);
   Data.hiveEntrance = timeTravel / soundConstant;
+  if(Data.hiveEntrance > 10) Data.safe -= hiveTrapRetired;
 }
 
