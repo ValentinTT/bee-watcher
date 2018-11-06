@@ -5,25 +5,26 @@ struct package Data;
 #include "innerDHT22.h"
 #include "hiveEntrance.h"
 #include "TransmitterNRF24L01.h"
-//#include "transmitter.h"
 #include "sleepMode.h"
 
 void setup() {
-  setupSleepMode();  
+  Serial.begin(9600);
+  setupSleepMode();
   setupTransmitterNRF24L01();
   setupInnerDHT22();
-  setupHCSR04();
-  //Test
-  pinMode(LED_BUILTIN, OUTPUT);
+  //setupHCSR04();
 }
 
 void loop() {
   goToSleep();
+  Serial.println("Woke up");
   readADXL(); //This and the fumes sensor should be checked every 5 minutes;
-  if(hasBeenAnHour()) { //This data is taken just once per hour
+  if(Data.safe != hiveSafe) Serial.println("Movimiento");
+  if (true){//hasBeenAnHour()) { //This data is taken just once per hour
     readTemperatureAndHumidity();
-    hiveEntranceOpening();
+    Serial.println("Measures taken");
   }
+  Serial.println("Sending Data");
   sendData();
 }
 

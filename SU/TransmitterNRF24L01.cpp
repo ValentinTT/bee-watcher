@@ -12,7 +12,7 @@ byte channel[5] = {'v', 'a', 'l', 't', 't'};
 
 RF24 radio(CE_PIN, CSN_PIN);
 
-const int timeout = 40 * 1000; //40 milliseconds
+const int timeout = 40 * 1000; //40 seconds
 unsigned long startTime;
 bool dataSent;
 
@@ -23,8 +23,9 @@ void setupTransmitterNRF24L01() {
 
 void sendData() {
   startTime = millis();
-  do 
+  do {
     dataSent = radio.write(&Data, sizeof(Data));
-  while(!dataSent && millis() < startTime + timeout);
+  } while(!dataSent && millis() < startTime + timeout);
+  resetData();
 }
 
