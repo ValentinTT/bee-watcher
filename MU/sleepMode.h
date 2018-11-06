@@ -1,5 +1,7 @@
 #ifndef SLEEPMODE_H
 #define SLEEPMODE_H
+
+//byte firstMeasures = 3;
 /** void setupSleepMode
  * The RTC must be the first thing to initialize to try to be as accurate as possible
  * with the compilation time, which is the time used to set the RTC time. 
@@ -26,5 +28,22 @@ String getTime();
  * routine has been working 
  */
 bool hasBeenAnHour();
+
+/**void sleepForWorking()
+ * This function put the microcontroller on sleep mode for almost an hour,
+ * so the beekeeprs can work on the hives, without trigger any alarm.
+ */
+void sleepForWorking();
+
+/**void stopSleeping()
+ * This function detach the interruption triggered by the RTC
+ */
+void stopSleeping();
+
+/** void setNextAlarm() 
+ * This function set the next alarm for the rtc module based on the actual time
+ */
+void setNextAlarm();
+
 #endif
 

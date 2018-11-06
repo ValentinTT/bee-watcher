@@ -14,10 +14,16 @@ void goToSleep();
  * module) which takes the code to the function wakeUp.
  */
 void setupSleepMode();
+
 /** bool hasBeenAnHour()
  * This function returns true if has been an hour since the sleeping-waking
  * routine has been working 
  */
 bool hasBeenAnHour();
+
+/** void setNextAlarm() 
+ * This function set the next alarm for the rtc module based on the actual time
+ */
+void setNextAlarm();
 #endif
 
