@@ -13,4 +13,9 @@ void seturReceiverNRF24L01();
  */
 void receiveData();
 
+/** void enableAnotherSPI(bool enable);
+ * This function activates/desactivates digital pin 3 so the nrf can work propertly
+ */
+void enableAnotherSPI(bool enable);
+
 #endif
