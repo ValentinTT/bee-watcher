@@ -5,30 +5,43 @@
 const byte xPin = 0;
 const byte yPin = 1;
 const byte zPin = 2;
-//Sensibility for the ADXL335
-const byte XYSensibility = 15; //Higher difference allowed between x and y axes
-const byte ZXYSensibility = 50; //Higher difference allowed between x-z axes or y-z axes
 //Variables for the ADXL335 reading
-short xValue;
-short yValue;
-short zValue;
+int xValue;
+int yValue;
+int zValue;
 
-int readADXL() {
+double readToDeg;
+
+void readADXL() {
   byte bentCounter = 0; 
   for(byte i = 0; i < 10; i++){ 
     xValue = analogRead(xPin);
     yValue = analogRead(yPin);
     zValue = analogRead(zPin);
-    if(abs(xValue - yValue) > XYSensibility) { //Checks the sensor's position
-      if(abs(xValue - zValue) > ZXYSensibility ||
-        abs(yValue - zValue) > ZXYSensibility) {
-        bentCounter++;
-      }
-    } else if(abs(xValue - yValue) + abs(yValue - zValue) < 10) { 
-      //If the three axes are almost identical it means there is no sensor connected
-      bentCounter = 6;
-      break;
+
+    xValue = map(xValue, 265, 402, -90, 90);
+    yValue = map(yValue, 265, 402, -90, 90);
+    zValue = map(zValue, 265, 402, -90, 90);
+
+    //X angle
+    readToDeg = RAD_TO_DEG * (atan2(-yValue, -zValue) + PI);
+    if(readToDeg < 20 || readToDeg > 50) { 
+      bentCounter++;
+      continue;
     }
+    //Y angle
+    readToDeg = RAD_TO_DEG * (atan2(-xValue, -zValue) + PI);
+    if(readToDeg < 280 || readToDeg > 315) { 
+      bentCounter++;
+      continue;
+    }
+    /*
+    //Z angle
+    readToDeg = RAD_TO_DEG * (atan2(-yValue, -xValue) + PI);
+    if(readToDeg < 140 || readToDeg > 180) { 
+      bentCounter++;
+      continue;
+    }*/   
     delay(100); //Delay in between messures to avoid electrical interfirence
   }
   if(bentCounter > 5) Data.safe -= hiveDangerMovement;

@@ -5,6 +5,6 @@
  *  result of the ADXL335 detecting any kind of rotation or movement
  *  it reads 10 times to avoid interference. 
  */
-int readADXL();
+void readADXL();
 #endif
 
