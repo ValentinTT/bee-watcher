@@ -49,7 +49,7 @@ void sendMessage(int alarmMsg) {
   //startSIM800L();
   Serial.println(F("AT+CMGF=1")); //Text Mode
   delay(1000);
-  Serial.println(F("AT+CMGS=\"2644550816\"\r")); //<-here goes beekeeper number 2644834024 //2645055525 //Chepi 154042489
+  Serial.println(F("AT+CMGS=\"000000000\"\r")); //<-here goes beekeeper number
   delay(1000);
   switch (alarmMsg) {//10 means ok, 9 means trap retired, 8 means fume, 7 means fume and trap, 5 means movement, 4 means trap and movement, 3 means fume and movement, 2 means all
     case 2:
